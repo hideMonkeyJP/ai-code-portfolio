@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Claude Code を使ったAIエージェント・ゲーム開発のポートフォリオ">
+  <title>AI × Code Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    /* ============================================================
+       RESET & TOKENS
+    ============================================================ */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:        #FFFDF9;
+      --bg2:       #FFF8F1;
+      --surface:   #FFFFFF;
+      --accent:    #FF7A3D;
+      --accent2:   #FF8C42;
+      --accent-lt: #FFE7D1;
+      --accent-md: #FFD6B0;
+      --navy:      #1E3A5F;
+      --text:      #1F2937;
+      --sub:       #5B6472;
+      --border:    #F1E2D2;
+      --border2:   #EADBCB;
+      --r-sm:      8px;
+      --r-md:      14px;
+      --r-lg:      20px;
+      --shadow-sm: 0 2px 10px rgba(31,41,55,0.07);
+      --shadow-md: 0 6px 24px rgba(31,41,55,0.10);
+      --shadow-lg: 0 12px 40px rgba(31,41,55,0.14);
+      --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Noto Sans JP', sans-serif;
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    img { display: block; max-width: 100%; }
+    a { text-decoration: none; }
+
+    /* ============================================================
+       SCROLL ANIMATIONS
+    ============================================================ */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+
+    /* ============================================================
+       NAV
+    ============================================================ */
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 48px;
+      height: 64px;
+      background: rgba(255,253,249,0.88);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 200;
+    }
+    .logo {
+      font-size: 1.1rem;
+      font-weight: 900;
+      color: var(--navy);
+      letter-spacing: -0.02em;
+    }
+    .logo em { color: var(--accent); font-style: normal; }
+    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links a {
+      color: var(--sub);
+      font-size: 0.875rem;
+      font-weight: 500;
+      padding: 4px 0;
+      position: relative;
+      transition: color var(--transition);
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--accent);
+      border-radius: 2px;
+      transition: width var(--transition);
+    }
+    .nav-links a:hover { color: var(--accent); }
+    .nav-links a:hover::after { width: 100%; }
+
+    /* ============================================================
+       HERO
+    ============================================================ */
+    .hero-wrap {
+      background: linear-gradient(160deg, #FFFDF9 0%, #FFF5EB 60%, #FFF8F1 100%);
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+      position: relative;
+    }
+    .hero-wrap::before {
+      content: '';
+      position: absolute;
+      top: -120px;
+      right: -120px;
+      width: 480px;
+      height: 480px;
+      background: radial-gradient(circle, rgba(255,122,61,0.10) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero {
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 96px 48px 88px;
+      display: grid;
+      grid-template-columns: 1fr 220px;
+      gap: 48px;
+      align-items: center;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--accent-lt);
+      color: var(--accent);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 5px 14px;
+      border-radius: 99px;
+      margin-bottom: 22px;
+      letter-spacing: 0.06em;
+    }
+    .hero h1 {
+      font-size: clamp(2.2rem, 4.8vw, 3.4rem);
+      font-weight: 900;
+      color: var(--navy);
+      line-height: 1.22;
+      letter-spacing: -0.03em;
+      margin-bottom: 22px;
+    }
+    .hero h1 .hi { color: var(--accent); }
+    .hero-lead {
+      font-size: 0.98rem;
+      color: var(--sub);
+      line-height: 1.85;
+      max-width: 500px;
+      margin-bottom: 38px;
+    }
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+    /* Buttons */
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 13px 30px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 700;
+      border-radius: var(--r-sm);
+      box-shadow: 0 4px 16px rgba(255,122,61,0.32);
+      transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+    }
+    .btn-primary:hover {
+      background: var(--accent2);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(255,122,61,0.40);
+    }
+    .btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 13px 24px;
+      color: var(--sub);
+      font-size: 0.9rem;
+      font-weight: 500;
+      border: 1.5px solid var(--border2);
+      border-radius: var(--r-sm);
+      transition: border-color var(--transition), color var(--transition);
+    }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* Stats card */
+    .hero-stats {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      padding: 28px 24px;
+      box-shadow: var(--shadow-md);
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .stat-item {
+      text-align: center;
+      padding: 18px 0;
+    }
+    .stat-item + .stat-item { border-top: 1px solid var(--border); }
+    .stat-num {
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 5px;
+    }
+    .stat-label { font-size: 0.72rem; color: var(--sub); font-weight: 500; letter-spacing: 0.04em; }
+
+    /* ============================================================
+       SECTION COMMON
+    ============================================================ */
+    .section {
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 80px 48px;
+    }
+    .section-head { margin-bottom: 44px; }
+    .kicker {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .section-head h2 {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: var(--navy);
+      letter-spacing: -0.025em;
+      line-height: 1.3;
+    }
+    .section-head p {
+      font-size: 0.9rem;
+      color: var(--sub);
+      margin-top: 10px;
+      line-height: 1.8;
+    }
+
+    /* ============================================================
+       WORKS GRID
+    ============================================================ */
+    .works-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--accent-md);
+    }
+    .card-thumb {
+      position: relative;
+      overflow: hidden;
+      background: #f0ede8;
+    }
+    .card-thumb img {
+      width: 100%;
+      aspect-ratio: 16/9;
+      object-fit: cover;
+      transition: transform 0.45s ease;
+    }
+    .card:hover .card-thumb img { transform: scale(1.04); }
+
+    .card-body { padding: 22px 24px 26px; }
+    .card-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 13px; }
+    .tag {
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 99px;
+      letter-spacing: 0.03em;
+    }
+    .tag-warm { background: var(--accent-lt); color: var(--accent); }
+    .tag-cool { background: #E8EFF8; color: var(--navy); }
+    .card h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--navy);
+      margin-bottom: 9px;
+      letter-spacing: -0.01em;
+    }
+    .card p {
+      font-size: 0.83rem;
+      color: var(--sub);
+      line-height: 1.75;
+    }
+
+    /* Wide card (tetris) */
+    .card-wide {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: 420px 1fr;
+    }
+    .card-wide .card-thumb { border-radius: 0; }
+    .card-wide .card-thumb img {
+      aspect-ratio: auto;
+      height: 100%;
+      min-height: 220px;
+    }
+    .card-wide .card-body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 36px 40px;
+    }
+    .card-wide h3 { font-size: 1.2rem; margin-bottom: 12px; }
+    .card-wide p { font-size: 0.88rem; }
+
+    /* ============================================================
+       CTA STRIP
+    ============================================================ */
+    .strip-wrap {
+      background: linear-gradient(135deg, #FFF3E6 0%, #FFE3CC 100%);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .strip {
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 56px 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 32px;
+    }
+    .strip-text h2 {
+      font-size: 1.45rem;
+      font-weight: 900;
+      color: var(--navy);
+      line-height: 1.4;
+      margin-bottom: 6px;
+    }
+    .strip-text h2 span { color: var(--accent); }
+    .strip-text p { font-size: 0.88rem; color: var(--sub); }
+
+    /* ============================================================
+       TECH STACK
+    ============================================================ */
+    .tech-wrap {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+    }
+    .tech-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 28px;
+    }
+    .tech-tag {
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 8px 18px;
+      background: var(--surface);
+      border: 1.5px solid var(--border2);
+      border-radius: var(--r-sm);
+      color: var(--text);
+      cursor: default;
+      transition: border-color var(--transition), color var(--transition), background var(--transition), transform var(--transition);
+    }
+    .tech-tag:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-lt);
+      transform: translateY(-1px);
+    }
+
+    /* ============================================================
+       FOOTER
+    ============================================================ */
+    footer {
+      padding: 40px 48px;
+      text-align: center;
+      background: var(--bg);
+    }
+    footer p { font-size: 0.78rem; color: var(--sub); line-height: 1.9; }
+    footer a { color: var(--accent); font-weight: 600; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ============================================================
+       RESPONSIVE
+    ============================================================ */
+    @media (max-width: 860px) {
+      nav { padding: 0 24px; }
+      .nav-links { gap: 20px; }
+      .hero { grid-template-columns: 1fr; padding: 60px 24px 56px; gap: 32px; }
+      .hero-stats { flex-direction: row; gap: 0; }
+      .stat-item { flex: 1; }
+      .stat-item + .stat-item { border-top: none; border-left: 1px solid var(--border); }
+      .works-grid { grid-template-columns: 1fr; }
+      .card-wide { grid-template-columns: 1fr; }
+      .card-wide .card-thumb img { min-height: auto; }
+      .strip { flex-direction: column; text-align: center; padding: 40px 24px; }
+      .section { padding: 60px 24px; }
+      .tech-wrap .section { padding: 60px 24px; }
+      footer { padding: 32px 24px; }
+    }
+
+    @media (max-width: 540px) {
+      .hero h1 { font-size: 2rem; }
+      .nav-links { display: none; }
+      .hero-stats { flex-direction: column; }
+      .stat-item + .stat-item { border-left: none; border-top: 1px solid var(--border); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ======== NAV ======== -->
+  <nav>
+    <div class="logo">AI<em>×</em>CODE</div>
+    <ul class="nav-links">
+      <li><a href="#works">Works</a></li>
+      <li><a href="#tech">Tech</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- ======== HERO ======== -->
+  <div class="hero-wrap">
+    <section class="hero">
+      <div class="hero-content reveal">
+        <p class="hero-badge">✦&nbsp; AI Developer Portfolio</p>
+        <h1>AIと<span class="hi">コード</span>で<br>つくったもの</h1>
+        <p class="hero-lead">
+          Claude Code を中心に、AIエージェント・ゲーム・Webアプリを開発しています。<br>
+          プロンプト設計からフロントエンド実装まで、ひとりでつくります。
+        </p>
+        <div class="hero-actions">
+          <a href="#works" class="btn-primary">作品を見る &rarr;</a>
+          <a href="#tech" class="btn-ghost">使用技術</a>
+        </div>
+      </div>
+      <div class="hero-stats reveal reveal-delay-1">
+        <div class="stat-item">
+          <div class="stat-num">3</div>
+          <div class="stat-label">Works</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">AI</div>
+          <div class="stat-label">駆動開発</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num">100<small style="font-size:1.1rem">%</small></div>
+          <div class="stat-label">自作</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ======== WORKS ======== -->
+  <section class="section" id="works">
+    <div class="section-head reveal">
+      <p class="kicker">Works</p>
+      <h2>制作実績</h2>
+      <p>AIエージェントからゲーム開発まで、実際に動くものをつくっています。</p>
+    </div>
+
+    <div class="works-grid">
+
+      <!-- Card 1: AI Agent -->
+      <div class="card reveal reveal-delay-1">
+        <div class="card-thumb">
+          <img src="image/1.png" alt="SEO Blog Writer Agent のスクリーンショット" loading="lazy">
+        </div>
+        <div class="card-body">
+          <div class="card-tags">
+            <span class="tag tag-warm">Claude Code</span>
+            <span class="tag tag-warm">AI Agent</span>
+            <span class="tag tag-cool">Skill</span>
+          </div>
+          <h3>SEO Blog Writer Agent</h3>
+          <p>指定文字数でSEO最適化記事を自動生成する Claude カスタムスキル。プロンプト設計・ツール連携まで一貫実装。</p>
+        </div>
+      </div>
+
+      <!-- Card 2: Shooter -->
+      <div class="card reveal reveal-delay-2">
+        <div class="card-thumb">
+          <img src="image/2.png" alt="Space Shooter ゲームのスクリーンショット" loading="lazy">
+        </div>
+        <div class="card-body">
+          <div class="card-tags">
+            <span class="tag tag-cool">JavaScript</span>
+            <span class="tag tag-cool">Canvas API</span>
+            <span class="tag tag-cool">Game</span>
+          </div>
+          <h3>Space Shooter</h3>
+          <p>ブラウザで動くシューティングゲーム。スコア・ライフ管理、衝突判定を Vanilla JS と Canvas API で実装。</p>
+        </div>
+      </div>
+
+      <!-- Card 3: Tetris (wide) -->
+      <div class="card card-wide reveal">
+        <div class="card-thumb">
+          <img src="image/3.png" alt="React Tetris のスクリーンショット" loading="lazy">
+        </div>
+        <div class="card-body">
+          <div class="card-tags">
+            <span class="tag tag-cool">React</span>
+            <span class="tag tag-cool">TypeScript</span>
+            <span class="tag tag-cool">Game</span>
+          </div>
+          <h3>React Tetris</h3>
+          <p>
+            React で実装したテトリス。スコア・ハイスコア管理、次のピース表示、キーボードコントロールに対応。<br>
+            コンポーネント設計から状態管理まで丁寧に実装しました。
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ======== CTA STRIP ======== -->
+  <div class="strip-wrap">
+    <div class="strip reveal">
+      <div class="strip-text">
+        <h2>AIと一緒に、<span>動くもの</span>をつくっています。</h2>
+        <p>お気軽にお問い合わせください。</p>
+      </div>
+      <a href="mailto:hidemonkey617@gmail.com" class="btn-primary">お問い合わせ &rarr;</a>
+    </div>
+  </div>
+
+  <!-- ======== TECH STACK ======== -->
+  <div class="tech-wrap" id="tech">
+    <section class="section">
+      <div class="section-head reveal">
+        <p class="kicker">Tech Stack</p>
+        <h2>使用技術</h2>
+        <p>AI を中心に、フロントエンドからエージェント開発まで幅広く扱います。</p>
+      </div>
+      <div class="tech-grid reveal">
+        <span class="tech-tag">Claude Code</span>
+        <span class="tech-tag">Anthropic API</span>
+        <span class="tech-tag">React</span>
+        <span class="tech-tag">TypeScript</span>
+        <span class="tech-tag">JavaScript</span>
+        <span class="tech-tag">HTML / CSS</span>
+        <span class="tech-tag">Node.js</span>
+        <span class="tech-tag">Canvas API</span>
+      </div>
+    </section>
+  </div>
+
+  <!-- ======== FOOTER ======== -->
+  <footer id="contact">
+    <p>
+      © 2026 AI × Code Portfolio<br>
+      <a href="mailto:hidemonkey617@gmail.com">hidemonkey617@gmail.com</a>
+    </p>
+  </footer>
+
+  <!-- ======== SCROLL ANIMATION ======== -->
+  <script>
+    const observer = new IntersectionObserver(
+      (entries) => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
+      { threshold: 0.12 }
+    );
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
+
+</body>
+</html>
