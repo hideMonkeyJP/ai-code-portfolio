@@ -5,6 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>hideMonkey | AI Developer Portfolio</title>
   <meta name="description" content="AIで、アイデアをプロダクトに。Claude Code・LLM活用の実践的AIエンジニアのポートフォリオ。">
+
+  <!-- OGP / SNS シェア -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://hidemonkeyjp.github.io/ai-code-portfolio/">
+  <meta property="og:title" content="hideMonkey | AI Developer Portfolio">
+  <meta property="og:description" content="AIで、アイデアをプロダクトに。Claude Code・LLM活用の実践的AIエンジニアのポートフォリオ。">
+  <meta property="og:image" content="https://hidemonkeyjp.github.io/ai-code-portfolio/image/1.png">
+  <meta property="og:locale" content="ja_JP">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="hideMonkey | AI Developer Portfolio">
+  <meta name="twitter:description" content="AIで、アイデアをプロダクトに。Claude Code・LLM活用の実践的AIエンジニアのポートフォリオ。">
+  <meta name="twitter:image" content="https://hidemonkeyjp.github.io/ai-code-portfolio/image/1.png">
+  <link rel="canonical" href="https://hidemonkeyjp.github.io/ai-code-portfolio/">
+
+  <!-- Favicon (SVG emoji) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐒</text></svg>">
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -457,9 +474,36 @@
       .about-highlights { grid-template-columns: 1fr; }
       .hero-stats { grid-template-columns: 1fr 1fr; }
     }
+  /* ===== Skip Navigation ===== */
+  .skip-nav {
+    position: absolute; top: -100%; left: 16px;
+    background: var(--accent); color: #fff;
+    padding: 10px 20px; border-radius: var(--radius-sm);
+    font-weight: 700; z-index: 9999;
+    transition: top .2s;
+  }
+  .skip-nav:focus { top: 16px; }
   </style>
+
+  <!-- JSON-LD 構造化データ -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "hideMonkey",
+    "url": "https://hidemonkeyjp.github.io/ai-code-portfolio/",
+    "sameAs": ["https://github.com/hideMonkeyJP"],
+    "jobTitle": "AI Developer",
+    "description": "Claude Code・LLMを活用したAI開発者。AIエージェント設計からWebアプリ実装まで。",
+    "email": "hidemonkey617@gmail.com",
+    "knowsAbout": ["AI Agent Development", "Claude Code", "LLM", "React", "JavaScript", "Prompt Engineering"]
+  }
+  </script>
 </head>
 <body>
+
+  <!-- Skip Navigation (a11y) -->
+  <a class="skip-nav" href="#works">コンテンツへスキップ</a>
 
   <!-- Navigation -->
   <nav class="nav" id="nav">
@@ -582,7 +626,7 @@
                 <div class="browser-dot y"></div>
                 <div class="browser-dot g"></div>
               </div>
-              <div class="browser-url"><span>space-shooter.game</span></div>
+              <div class="browser-url"><span>hidemonkeyjp.github.io/space-shooter</span></div>
             </div>
             <div class="browser-content">
               <img src="image/2.png" alt="ブラウザで動くスペースシューターゲーム" loading="lazy">
@@ -611,7 +655,7 @@
                 <div class="browser-dot y"></div>
                 <div class="browser-dot g"></div>
               </div>
-              <div class="browser-url"><span>react-tetris.app</span></div>
+              <div class="browser-url"><span>hidemonkeyjp.github.io/react-tetris</span></div>
             </div>
             <div class="browser-content">
               <img src="image/3.png" alt="Reactで実装したテトリスゲーム" loading="lazy">
@@ -835,13 +879,23 @@
     // ===== Hamburger Menu =====
     const hamburger = document.getElementById('hamburger');
     const navLinks = document.getElementById('navLinks');
-    function toggleMenu() { navLinks.classList.toggle('open'); }
-    hamburger.addEventListener('click', toggleMenu);
+    function toggleMenu(open) {
+      const isOpen = open !== undefined ? open : !navLinks.classList.contains('open');
+      navLinks.classList.toggle('open', isOpen);
+      hamburger.setAttribute('aria-expanded', String(isOpen));
+    }
+    hamburger.setAttribute('aria-expanded', 'false');
+    hamburger.setAttribute('aria-controls', 'navLinks');
+    hamburger.addEventListener('click', () => toggleMenu());
     hamburger.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleMenu(); }
     });
     navLinks.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => navLinks.classList.remove('open'));
+      link.addEventListener('click', () => toggleMenu(false));
+    });
+    // Close menu on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && navLinks.classList.contains('open')) toggleMenu(false);
     });
   </script>
 </body>
